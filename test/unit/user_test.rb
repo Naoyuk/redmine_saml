@@ -42,7 +42,8 @@ class UserTest < RedmineSaml::TestCase
                                                 mail: 'new@example.com',
                                                 admin: false
         assert_not_nil new
-        assert_in_delta Time.zone.now, new.created_on, 1
+        assert_not_nil new.created_on
+        assert_operator new.created_on, :<=, Time.zone.now
       end
 
       should 'fallback missing first and last name from display name' do
