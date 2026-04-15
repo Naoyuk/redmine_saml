@@ -65,6 +65,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: AlphaNodes/additionals
+          ref: ${{ matrix.redmine == '6.0-stable' && '4.2.0' || 'main' }}
           path: redmine/plugins/additionals
 
       - name: Checkout redmine_saml
