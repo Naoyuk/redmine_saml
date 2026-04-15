@@ -47,10 +47,10 @@ class UserTest < RedmineSaml::TestCase
 
       should 'fallback missing first and last name from display name' do
         auth = {
-          saml_login: 'pemberton@sscs.ca',
+          saml_login: 'single-name@example.com',
           first_name: nil,
           last_name: nil,
-          mail: 'pemberton@sscs.ca',
+          mail: 'single-name@example.com',
           info: {
             name: 'Pemberton'
           }
