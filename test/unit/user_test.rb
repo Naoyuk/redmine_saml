@@ -44,6 +44,24 @@ class UserTest < RedmineSaml::TestCase
         assert_not_nil new
         assert_in_delta Time.zone.now, new.created_on, 1
       end
+
+      should 'fallback missing first and last name from display name' do
+        auth = {
+          saml_login: 'pemberton@sscs.ca',
+          first_name: nil,
+          last_name: nil,
+          mail: 'pemberton@sscs.ca',
+          info: {
+            name: 'Pemberton'
+          }
+        }
+
+        new = User.find_or_create_from_omniauth auth
+
+        assert_not_nil new
+        assert_equal 'Pemberton', new.firstname
+        assert_equal '-', new.lastname
+      end
     end
 
     context 'different attribute mappings' do

@@ -45,6 +45,8 @@ module RedmineSaml
                              hash&.send(*params) # For each key, apply method :[] with key as parameter
                            end
           end
+
+          apply_name_fallbacks!(h, omniauth)
         end
       end
 
@@ -55,6 +57,32 @@ module RedmineSaml
       end
 
       private
+
+      def apply_name_fallbacks!(attributes, omniauth)
+        return if attributes[:firstname].present? && attributes[:lastname].present?
+
+        display_name = extract_display_name(omniauth)
+        return if display_name.blank?
+
+        firstname, lastname = split_display_name(display_name)
+        attributes[:firstname] = firstname if attributes[:firstname].blank?
+        attributes[:lastname] = lastname if attributes[:lastname].blank?
+      end
+
+      def extract_display_name(omniauth)
+        data = omniauth.deep_symbolize_keys
+
+        data.dig(:info, :name).presence ||
+          data.dig(:extra, :raw_info, :name).presence ||
+          data.dig(:extra, :raw_info, :displayname).presence
+      end
+
+      def split_display_name(display_name)
+        parts = display_name.to_s.strip.split(/\s+/)
+        return [display_name, '-'] if parts.size <= 1
+
+        [parts[0..-2].join(' '), parts[-1]]
+      end
 
       def validated_configuration?
         @validated_configuration ||= false
