@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'redmine_saml/base'
+
 module RedmineSaml
   VERSION = '1.0.6'
 
@@ -10,7 +12,7 @@ module RedmineSaml
   include RedminePluginKit::PluginBase
 
   class << self
-    delegate :user_attributes_from_saml, :configured_saml, :on_login_callback, to: Base
+    delegate :user_attributes_from_saml, :configured_saml, :on_login_callback, to: RedmineSaml::Base
 
     def enabled?
       setting? :saml_enabled
