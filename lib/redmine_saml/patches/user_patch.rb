@@ -12,6 +12,8 @@ module RedmineSaml
       class_methods do
         def find_or_create_from_omniauth(omniauth)
           user_attributes = RedmineSaml.user_attributes_from_saml omniauth
+          apply_name_fallbacks!(user_attributes, omniauth)
+          Rails.logger.info "SAML mapped user_attributes: #{user_attributes.inspect}"
           # Additionals.debug "user_attributes: #{user_attributes.inspect}"
 
           user = nil
@@ -38,6 +40,27 @@ module RedmineSaml
           RedmineSaml.on_login_callback&.call omniauth, user
 
           user
+        end
+
+        private
+
+        def apply_name_fallbacks!(user_attributes, omniauth)
+          return if user_attributes[:firstname].present? && user_attributes[:lastname].present?
+
+          display_name = omniauth&.dig(:info, :name).presence ||
+                         omniauth&.dig(:extra, :raw_info, :name).presence ||
+                         omniauth&.dig(:extra, :raw_info, :displayname).presence
+          return if display_name.blank?
+
+          parts = display_name.to_s.strip.split(/\s+/)
+          firstname, lastname = if parts.size <= 1
+                                  [display_name, '-']
+                                else
+                                  [parts[0..-2].join(' '), parts[-1]]
+                                end
+
+          user_attributes[:firstname] = firstname if user_attributes[:firstname].blank?
+          user_attributes[:lastname] = lastname if user_attributes[:lastname].blank?
         end
       end
 
