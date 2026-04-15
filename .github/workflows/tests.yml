@@ -107,6 +107,7 @@ jobs:
         env:
           RAILS_ENV: test
           MYSQL_PORT: ${{ job.services.mysql.ports[3306] }}
+          NAME: ''
         working-directory: redmine
         run: |
           bundle exec rake generate_secret_token
