@@ -46,7 +46,7 @@ module RedmineSaml
                            end
           end
 
-          apply_name_fallbacks!(h, omniauth)
+          apply_name_fallbacks! h, omniauth
         end
       end
 
@@ -61,10 +61,10 @@ module RedmineSaml
       def apply_name_fallbacks!(attributes, omniauth)
         return if attributes[:firstname].present? && attributes[:lastname].present?
 
-        display_name = extract_display_name(omniauth)
+        display_name = extract_display_name omniauth
         return if display_name.blank?
 
-        firstname, lastname = split_display_name(display_name)
+        firstname, lastname = split_display_name display_name
         attributes[:firstname] = firstname if attributes[:firstname].blank?
         attributes[:lastname] = lastname if attributes[:lastname].blank?
       end

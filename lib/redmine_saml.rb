@@ -10,6 +10,8 @@ module RedmineSaml
   include RedminePluginKit::PluginBase
 
   class << self
+    delegate :user_attributes_from_saml, :configured_saml, :on_login_callback, to: Base
+
     def enabled?
       setting? :saml_enabled
     end
@@ -24,18 +26,6 @@ module RedmineSaml
 
     def saml_login_label
       setting :saml_login_label
-    end
-
-    def user_attributes_from_saml(omniauth)
-      Base.user_attributes_from_saml omniauth
-    end
-
-    def configured_saml
-      Base.configured_saml
-    end
-
-    def on_login_callback
-      Base.on_login_callback
     end
 
     private
