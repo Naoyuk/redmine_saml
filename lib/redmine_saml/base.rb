@@ -56,17 +56,26 @@ module RedmineSaml
            admin: true }]
       end
 
+      def fallback_name_attributes(omniauth)
+        display_name = extract_display_name omniauth
+        return {} if display_name.blank?
+
+        firstname, lastname = split_display_name display_name
+
+        {
+          firstname: truncate_user_attribute(:firstname, firstname.presence || '-'),
+          lastname: truncate_user_attribute(:lastname, lastname.presence || '-')
+        }
+      end
+
       private
 
       def apply_name_fallbacks!(attributes, omniauth)
         return if attributes[:firstname].present? && attributes[:lastname].present?
 
-        display_name = extract_display_name omniauth
-        return if display_name.blank?
-
-        firstname, lastname = split_display_name display_name
-        attributes[:firstname] = firstname if attributes[:firstname].blank?
-        attributes[:lastname] = lastname if attributes[:lastname].blank?
+        fallback_attributes = fallback_name_attributes omniauth
+        attributes[:firstname] = fallback_attributes[:firstname] if attributes[:firstname].blank?
+        attributes[:lastname] = fallback_attributes[:lastname] if attributes[:lastname].blank?
       end
 
       def extract_display_name(omniauth)
@@ -82,6 +91,11 @@ module RedmineSaml
         return [display_name, '-'] if parts.size <= 1
 
         [parts[0..-2].join(' '), parts[-1]]
+      end
+
+      def truncate_user_attribute(attribute, value)
+        limit = User.columns_hash[attribute.to_s]&.limit || 255
+        value.to_s.slice(0, limit)
       end
 
       def validated_configuration?

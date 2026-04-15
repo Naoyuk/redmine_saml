@@ -47,20 +47,9 @@ module RedmineSaml
         def apply_name_fallbacks!(user_attributes, omniauth)
           return if user_attributes[:firstname].present? && user_attributes[:lastname].present?
 
-          display_name = omniauth&.dig(:info, :name).presence ||
-                         omniauth&.dig(:extra, :raw_info, :name).presence ||
-                         omniauth&.dig(:extra, :raw_info, :displayname).presence
-          return if display_name.blank?
-
-          parts = display_name.to_s.strip.split(/\s+/)
-          firstname, lastname = if parts.size <= 1
-                                  [display_name, '-']
-                                else
-                                  [parts[0..-2].join(' '), parts[-1]]
-                                end
-
-          user_attributes[:firstname] = firstname if user_attributes[:firstname].blank?
-          user_attributes[:lastname] = lastname if user_attributes[:lastname].blank?
+          fallback_attributes = RedmineSaml::Base.fallback_name_attributes omniauth
+          user_attributes[:firstname] = fallback_attributes[:firstname] if user_attributes[:firstname].blank?
+          user_attributes[:lastname] = fallback_attributes[:lastname] if user_attributes[:lastname].blank?
         end
       end
 

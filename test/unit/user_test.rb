@@ -63,6 +63,24 @@ class UserTest < RedmineSaml::TestCase
         assert_equal 'Pemberton', new.firstname
         assert_equal '-', new.lastname
       end
+
+      should 'truncate fallback names to fit Redmine limits' do
+        auth = {
+          saml_login: 'admin@example.com',
+          first_name: nil,
+          last_name: nil,
+          mail: 'admin@example.com',
+          info: {
+            name: 'Admin Sea to Sky Community Services Society'
+          }
+        }
+
+        new = User.find_or_create_from_omniauth auth
+
+        assert_not_nil new
+        assert_equal 'Admin Sea to Sky Community Ser', new.firstname
+        assert_equal 'Society', new.lastname
+      end
     end
 
     context 'different attribute mappings' do
